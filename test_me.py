@@ -1,4 +1,4 @@
-print("🌞 This is working!")
+print("This is working!")
 
 def hello():
     print("Inside the function")
