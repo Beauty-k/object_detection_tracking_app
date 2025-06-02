@@ -47,8 +47,8 @@ def detect_from_webcam(model_path="yolov8s.pt"):
                 coord_text,
                 (x1, y1 - 10),
                 cv2.FONT_HERSHEY_SIMPLEX,
-                0.5,
-                (255,0,0),
+                0.75,
+                (0,0,0),
                 1,
                 cv2.LINE_AA
             )
