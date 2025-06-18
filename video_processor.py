@@ -1,4 +1,5 @@
 from distance_calculator import DistanceCalculator
+from deep_sort_realtime.deepsort_tracker import DeepSort
 import cv2
 import os
 
@@ -35,14 +36,14 @@ class VideoProcessor:
         out = cv2.VideoWriter(output_path, fourcc, self.fps, (self.width, self.height))
         return out
     
-    def process_video(self, detector, output_path, display=True):
+    def process_video(self, detector, output_path, display=False):
         print("Processing frames....")
         self.ensure_output_directory(output_path)
         writer = self.setup_video_writer(output_path)
         frame_count = 0
         all_detections = []
         
-        distance_calculator = DistanceCalculator(reference_label="scale", reference_mm=300)
+        distance_calculator = DistanceCalculator("scale", reference_mm=300)
 
         while True:
             ret, frame = self.cap.read()
@@ -55,7 +56,7 @@ class VideoProcessor:
             if distance_calculator.pixel_per_mm is None:
                 distance_calculator.update_pixel_mm_ratio(detections)
 
-            target_boxes = [d for d in detections if d["label"] in ["Bottle", "Book"]]
+            target_boxes = [d for d in detections if d["label"] in ["Book", "pen"]]
             if len(target_boxes) == 2:
                 box1 = target_boxes[0]["box"]
                 label1 = target_boxes[0]["label"]

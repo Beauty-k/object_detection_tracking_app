@@ -1,8 +1,8 @@
 
-Scale detection - v3 2025-06-08 1:08pm
+Scale detection - v4 2025-06-09 8:11am
 ==============================
 
-This dataset was exported via roboflow.com on June 8, 2025 at 1:09 PM GMT
+This dataset was exported via roboflow.com on June 9, 2025 at 8:38 AM GMT
 
 Roboflow is an end-to-end computer vision platform that helps you
 * collaborate with your team on computer vision projects
@@ -17,7 +17,7 @@ visit https://github.com/roboflow/notebooks
 
 To find over 100k other datasets and pre-trained models, visit https://universe.roboflow.com
 
-The dataset includes 105 images.
+The dataset includes 212 images.
 Scale are annotated in YOLOv8 format.
 
 The following pre-processing was applied to each image:

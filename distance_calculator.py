@@ -2,7 +2,7 @@ import math
 import cv2
 
 class DistanceCalculator:
-    def __init__(self, reference_label="scale", reference_mm=300):
+    def __init__(self, reference_label, reference_mm=300):
         self.reference_label = reference_label
         self.reference_mm = reference_mm
         self.pixel_per_mm = None

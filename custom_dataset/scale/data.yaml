@@ -2,12 +2,12 @@ train: ../train/images
 val: ../valid/images
 test: ../test/images
 
-nc: 4
-names: ['Book', 'Bottle', 'Cup', 'scale']
+nc: 6
+names: ['Book', 'Bottle', 'Cup', 'pen', 'plate', 'scale']
 
 roboflow:
   workspace: beauty-kumari
   project: scale-detection-k0esb
-  version: 3
+  version: 4
   license: CC BY 4.0
-  url: https://universe.roboflow.com/beauty-kumari/scale-detection-k0esb/dataset/3
+  url: https://universe.roboflow.com/beauty-kumari/scale-detection-k0esb/dataset/4

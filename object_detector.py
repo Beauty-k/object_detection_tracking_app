@@ -4,7 +4,6 @@ import torch
 import os
 import tempfile
 
-# ----------Object detection-----------
 class ObjectDetector:
 
     def __init__(self, model_path):
@@ -53,7 +52,7 @@ class ObjectDetector:
 
         return annotated_frame, detections
 
-# ----------Video processing---------
+
 
 
 
