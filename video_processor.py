@@ -1,5 +1,6 @@
-from distance_calculator import DistanceCalculator
+from calculators.distance import _DistanceCalculator
 from deep_sort_realtime.deepsort_tracker import DeepSort
+from tracker.deep_sort_tracker import DeepSortTracker
 import cv2
 import os
 
@@ -43,16 +44,48 @@ class VideoProcessor:
         frame_count = 0
         all_detections = []
         
-        distance_calculator = DistanceCalculator("scale", reference_mm=300)
-
+        distance_calculator = _DistanceCalculator("scale", reference_mm=300)
+        tracker = DeepSort(max_age=30)
         while True:
             ret, frame = self.cap.read()
             if not ret:
                 break
 
             # frame_count += 1
+            # Step 1: Get YOLO detections
             annotated_frame, detections = detector.get_detection(frame)
 
+            # Step 2: Prepare input for Deep SORT
+            tracking_inputs = []
+            for d in detections:
+                xc, yc, w, h = d["box"]
+                x = xc - w / 2
+                y = yc - h / 2
+                tracking_inputs.append(([x, y, w, h], d["confidence"], d["label"]))
+
+             # Step 3: Update tracks
+            tracks = tracker.update_tracks(tracking_inputs, frame=frame)
+            tracked_detections = []
+            for track in tracks:
+                if not track.is_confirmed():
+                    continue
+                track_id = track.track_id
+                l, t, r, b = track.to_ltrb()
+                label = track.det_class
+                box = [l, t, r - l, b - t]
+
+                # Draw box and label
+                cv2.rectangle(annotated_frame, (int(l), int(t)), (int(r), int(b)), (0, 255, 0), 2)
+                cv2.putText(annotated_frame, f"{label}-{track_id}", (int(l), int(t) - 10),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+
+                tracked_detections.append({
+                    "id": track_id,
+                    "label": label,
+                    "box": box
+                })
+
+            # Step 4: Using tracked detections for distance calculation
             if distance_calculator.pixel_per_mm is None:
                 distance_calculator.update_pixel_mm_ratio(detections)
 
