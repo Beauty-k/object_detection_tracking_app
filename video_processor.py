@@ -1,4 +1,4 @@
-from calculators.distance import _DistanceCalculator
+from calculators.distance_calculator import _DistanceCalculator
 from deep_sort_realtime.deepsort_tracker import DeepSort
 from tracker.deep_sort_tracker import DeepSortTracker
 import cv2
@@ -37,7 +37,7 @@ class VideoProcessor:
         out = cv2.VideoWriter(output_path, fourcc, self.fps, (self.width, self.height))
         return out
     
-    def process_video(self, detector, output_path, display=False):
+    def process_video(self, detector, output_path, display, target_labels):
         print("Processing frames....")
         self.ensure_output_directory(output_path)
         writer = self.setup_video_writer(output_path)
@@ -75,7 +75,7 @@ class VideoProcessor:
                 box = [l, t, r - l, b - t]
 
                 # Draw box and label
-                cv2.rectangle(annotated_frame, (int(l), int(t)), (int(r), int(b)), (0, 255, 0), 2)
+                # cv2.rectangle(annotated_frame, (int(l), int(t)), (int(r), int(b)), (0, 255, 0), 2)
                 cv2.putText(annotated_frame, f"{label}-{track_id}", (int(l), int(t) - 10),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
 
@@ -89,7 +89,7 @@ class VideoProcessor:
             if distance_calculator.pixel_per_mm is None:
                 distance_calculator.update_pixel_mm_ratio(detections)
 
-            target_boxes = [d for d in detections if d["label"] in ["Book", "pen"]]
+            target_boxes = [d for d in detections if d["label"] in target_labels]
             if len(target_boxes) == 2:
                 box1 = target_boxes[0]["box"]
                 label1 = target_boxes[0]["label"]

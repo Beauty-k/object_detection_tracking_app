@@ -1,6 +1,7 @@
 from deep_sort_realtime.deepsort_tracker import DeepSort
+from base_tracker import ITracker
 
-class DeepSortTracker:
+class DeepSortTracker(ITracker):
     def __init__(self):
         self.tracker = DeepSort(max_age=30)
 
