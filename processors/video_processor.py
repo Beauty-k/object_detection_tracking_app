@@ -22,6 +22,7 @@ class VideoProcessor:
 
     def get_video_properties(self):
         width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        print("Frame width in pixels:", width)
         height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         fps = self.cap.get(cv2.CAP_PROP_FPS)
         return width, height, fps
@@ -45,6 +46,8 @@ class VideoProcessor:
         all_detections = []
         
         distance_calculator = _DistanceCalculator("scale", reference_mm=300)
+        # distance_calculator = _DistanceCalculator(114, 800, 848)
+
         tracker = DeepSort(max_age=30)
         while True:
             ret, frame = self.cap.read()
@@ -75,9 +78,9 @@ class VideoProcessor:
                 box = [l, t, r - l, b - t]
 
                 # Draw box and label
-                # cv2.rectangle(annotated_frame, (int(l), int(t)), (int(r), int(b)), (0, 255, 0), 2)
+                cv2.rectangle(annotated_frame, (int(l), int(t)), (int(r), int(b)), (0, 255, 0), 2)
                 cv2.putText(annotated_frame, f"{label}-{track_id}", (int(l), int(t) - 10),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+                cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
 
                 tracked_detections.append({
                     "id": track_id,
@@ -89,7 +92,7 @@ class VideoProcessor:
             if distance_calculator.pixel_per_mm is None:
                 distance_calculator.update_pixel_mm_ratio(detections)
 
-            target_boxes = [d for d in detections if d["label"] in target_labels]
+            target_boxes = [d for d in tracked_detections if d["label"] in target_labels]
             if len(target_boxes) == 2:
                 box1 = target_boxes[0]["box"]
                 label1 = target_boxes[0]["label"]

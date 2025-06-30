@@ -1,26 +1,29 @@
 import math
+from math import radians, tan
 import cv2
 from typing import Tuple
 from calculators.base import ICalculator
 
 class _DistanceCalculator(ICalculator):
     def __init__(self, reference_label:str, reference_mm: float = 300):
+    #   self.pixel_per_mm = self.estimate_pixel_per_mm(fov_deg, distance_mm, frame_width_px)
         self.reference_label = reference_label
         self.reference_mm = reference_mm
         self.pixel_per_mm = None
-        # self.distance_mm = None
-        self.reference_widths = []
+        self.distance_mm = None
+        # self.reference_widths = []
 
     def update_pixel_mm_ratio(self, detections):
+
+    #   fov_rad = radians(fov_deg)
+    #   scene_width_mm = 2 * distance_mm * tan(fov_rad / 2)
+    #   return frame_width_px / scene_width_mm
+
         for detection in detections:
             if detection["label"] == self.reference_label:
                 _,_,w,_ = detection["box"]
-                # self.reference_widths.append(w)
-                # if len(self.reference_widths) > 10:
-                #     self.reference_widths.pop(0)
-                #     avg_width = sum(self.reference_widths) / len(self.reference_widths)
+                print("observed pixel width", w)
                 self.pixel_per_mm = w / self.reference_mm
-                # print(f"Pixel/mm ratio: {self.pixel_per_mm:.4f}, Detected Distance: {self.distance_mm} mm")
                 return True
         return False
     
@@ -39,8 +42,8 @@ class _DistanceCalculator(ICalculator):
         return None, (x1, y1), (x2, y2)
     
     def annotate_distance(self, frame, box1, box2, label1, label2):
+        print(f"[DEBUG] Annotating distance between {label1} and {label2}")
         distance_mm, p1, p2 = self.calculate(box1, box2)
-
         if distance_mm is not None:
             cv2.line(frame, p1, p2, (0, 0, 255), 2)
             mid = ((p1[0] + p2[0]) // 2, (p1[1] + p2[1]) // 2)

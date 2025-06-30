@@ -3,6 +3,8 @@ import cv2
 import torch
 import os
 import tempfile
+from video_sources.file_source import FileSource
+from processors.video_processor import VideoProcessor
 
 class ObjectDetector:
 
@@ -18,8 +20,8 @@ class ObjectDetector:
         else:
             print("Running on CPU")
 
-    def get_detection(self, frame):
-        results = self.model(frame)[0]
+    def get_detection(self, annotated_frame):
+        results = self.model(annotated_frame)[0]
         annotated_frame = results.plot()
         detections = []
 
@@ -49,8 +51,21 @@ class ObjectDetector:
                 "confidence": round(conf, 2),
                 "box": [round(x, 2) for x in [x_center, y_center, w, h]]
             })
+            return annotated_frame, detections
 
-        return annotated_frame, detections
+        # def run_detection(self, input_path, output_path, label1="scale", label2="diary"):
+        #     print(f"[INFO] Running pipeline on: {input_path}")
+        #     video_source = FileSource(input_path)
+        #     processor = VideoProcessor(video_source)
+        #     detections = processor.process_video(
+        #         detector=self,
+        #         output_path=output_path,
+        #         display=False,
+        #         target_labels=[label1, label2]
+        #     )
+
+        #     print(f"[INFO] Annotated video saved to: {output_path}")
+        #     return detections
 
 
 
