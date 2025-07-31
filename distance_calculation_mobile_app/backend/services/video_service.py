@@ -6,7 +6,7 @@ from object_detection_app.detector.object_detector import ObjectDetector
 from object_detection_app.processors.video_processor import VideoProcessor
 from object_detection_app.calculators.distance_calculator import DistanceCalculator
 
-async def process_uploaded_video(file: UploadFile, label1: str, label2: str):
+def process_uploaded_video(file: UploadFile, label1: str, label2: str):
     # Save uploaded file to a temp location
     temp_input_path = Path("temp") / file.filename
     with open(temp_input_path, "wb") as buffer:
