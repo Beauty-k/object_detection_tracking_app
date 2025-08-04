@@ -4,3 +4,6 @@
 *.pt
 __pycache__/
 temp/
+*.pyc
+.env
+static/output.mp4
