@@ -26,8 +26,8 @@ class MyApp extends StatelessWidget {
     final response = await http.get(Uri.parse("http://10.0.2.2:8000/ping"));
 
     if (response.statusCode == 200) {
-      print("✅ Connected: ${jsonDecode(response.body)}");
+      print("Connected: ${jsonDecode(response.body)}");
     } else {
-      print("❌ Connection failed: ${response.statusCode}");
+      print("Connection failed: ${response.statusCode}");
     }
   }
