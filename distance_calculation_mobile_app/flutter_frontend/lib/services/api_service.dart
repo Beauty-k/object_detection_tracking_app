@@ -1,34 +1,39 @@
-    // import 'dart:convert';
-// import 'package:http/http.dart' as http;
-// import 'package:http_parser/http_parser.dart';
+import 'dart:convert';
+import 'dart:io';
+import 'package:http/http.dart' as http;
 
-// class ApiService {
-//   // Replace with your machine’s IP address running the FastAPI server
-//   static const String baseUrl = 'http://192.168.141.138:8000';
+class ApiService {
+  static const String baseUrl = "http://10.0.2.2:8000/video";
 
-//   static Future<String> sendVideoToBackend(String filePath, String label1, String label2) async {
-//     var uri = Uri.parse('$baseUrl/video/calculate-distance');
-//     var request = http.MultipartRequest('POST', uri);
+  /// Uploads a video to the backend and calculates distance
+  static Future<Map<String, dynamic>> uploadVideoAndCalculateDistance({
+    required File videoFile,
+    required String object1,
+    required String object2,
+  }) async {
+    final uri = Uri.parse("$baseUrl/calculate-distance");
 
-//     request.files.add(await http.MultipartFile.fromPath(
-//       'file',
-//       filePath,
-//       contentType: MediaType('video', 'mp4'),
-//     ));
+    final request = http.MultipartRequest('POST', uri);
 
-//     request.fields['label1'] = label1;
-//     request.fields['label2'] = label2;
+    // Attach video file
+    request.files.add(await http.MultipartFile.fromPath('file', videoFile.path));
 
-//     var response = await request.send();
+    // Add form fields for object labels
+    request.fields['label1'] = object1;
+    request.fields['label2'] = object2;
 
-//     if (response.statusCode == 200) {
-//       final res = await http.Response.fromStream(response);
-//       final decoded = jsonDecode(res.body);
+    try {
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
 
-//       // Make sure the backend returns 'output_video_path' key
-//       return "$baseUrl/${decoded['output_video_path']}";
-//     } else {
-//       throw Exception('Failed to process video. Status code: ${response.statusCode}');
-//     }
-//   }
-// }
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        throw Exception("Failed to upload video: ${response.body}");
+      }
+    } catch (e) {
+      throw Exception("Error uploading video: $e");
+    }
+  }
+}
+

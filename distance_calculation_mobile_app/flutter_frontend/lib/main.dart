@@ -1,10 +1,15 @@
+// ignore_for_file: avoid_print
+
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
+import 'package:http/http.dart' as http;
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
+  testConnection(); // Now safe to call
 }
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -12,6 +17,17 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       home: HomeScreen(),
+      
     );
   }
 }
+
+  Future<void> testConnection() async {
+    final response = await http.get(Uri.parse("http://10.0.2.2:8000/ping"));
+
+    if (response.statusCode == 200) {
+      print("✅ Connected: ${jsonDecode(response.body)}");
+    } else {
+      print("❌ Connection failed: ${response.statusCode}");
+    }
+  }

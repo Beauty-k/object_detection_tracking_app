@@ -10,6 +10,9 @@ from fastapi import FastAPI
 from routes.video_router import video_router
 
 app = FastAPI(title="Distance Measurement API")
+@app.get("/ping")
+def ping():
+    return {"status": "ok", "message": "Server is alive!"}
 app.include_router(video_router, prefix="/video", tags=["Video Distance"])
 
 app.add_middleware(

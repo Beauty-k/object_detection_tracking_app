@@ -1,11 +1,12 @@
-import 'package:flutter/material.dart';
-import 'package:file_picker/file_picker.dart';
 import 'dart:io';
-import 'package:http/http.dart' as http;
-import 'package:http_parser/http_parser.dart';
+import 'package:flutter/material.dart';
 
-// import 'package:path/path.dart';
-// import 'package:mime/mime.dart';
+import '../reusable_widgets/custom_app_bar.dart';
+import '../reusable_widgets/custom_button.dart';
+import '../reusable_widgets/distance_card.dart';
+import '../reusable_widgets/video_preview.dart';
+import '../services/file_picker_service.dart';
+import '../services/api_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -15,61 +16,42 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  File? selectedFile;
-  String? selectedFileName;
+  File? selectedVideoFile;
   String apiResponse = "";
+  bool isLoading = false;
 
-  // File picker logic
-  Future<void> pickVideo() async {
-    final result = await FilePicker.platform.pickFiles(type: FileType.video);
-    if (result != null && result.files.single.path != null) {
-      setState(() {
-        selectedFile = File(result.files.single.path!);
-        selectedFileName = result.files.single.name;
-      });
-    }
-  }
+  Future<void> pickAndUploadVideo() async {
+    final file = await FilePickerService.pickVideoFile();
 
-  // Upload logic
-  Future<void> uploadVideo() async {
-    if (selectedFile == null) {
-      setState(() {
-        apiResponse = "Please choose a video first.";
-      });
+    if (file == null) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text("No video selected")));
       return;
     }
 
-    final uri = Uri.parse(
-      "http://192.168.141.138:8000/video/calculate-distance",
-    );
+    setState(() {
+      selectedVideoFile = file;
+      apiResponse = "";
+      isLoading = true;
+    });
 
-    final request = http.MultipartRequest('POST', uri);
+    try {
+      final response = await ApiService.uploadVideoAndCalculateDistance(
+        videoFile: file,
+        object1: "wallet",
+        object2: "card",
+      );
 
-    // Attach video file
-    request.files.add(
-      await http.MultipartFile.fromPath(
-        'file', // key must match FastAPI param
-        selectedFile!.path,
-        contentType: MediaType('video', 'mp4'),
-      ),
-    );
-
-    // Add labels
-    request.fields['label1'] = 'blessing_card';
-    request.fields['label2'] = 'wallet';
-
-    // Send request
-    final response = await request.send();
-
-    // Handle response
-    if (response.statusCode == 200) {
-      final responseBody = await response.stream.bytesToString();
       setState(() {
-        apiResponse = "Success: $responseBody";
+        apiResponse = "Distance: ${response['distance'] ?? 'N/A'}";
       });
-    } else {
+    } catch (e) {
       setState(() {
-        apiResponse = "Failed: ${response.statusCode}";
+        apiResponse = "Upload failed: $e";
+      });
+    } finally {
+      setState(() {
+        isLoading = false;
       });
     }
   }
@@ -77,36 +59,43 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Distance Measurement")),
-      body: Center(
+      appBar: const CustomAppBar(title: "Distance Measurement"),
+      body: SingleChildScrollView(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
-              "Upload a video to measure distance",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            VideoPreview(
+              videoPlayer: selectedVideoFile != null
+                  ? Text("Selected Video:\n${selectedVideoFile!.path}")
+                  : Container(
+                      height: 200,
+                      color: Colors.grey[300],
+                      child: const Center(child: Text("No video selected")),
+                    ),
             ),
-            const SizedBox(height: 20),
 
-            ElevatedButton(
-              onPressed: pickVideo,
-              child: const Text("Choose Video"),
+            const DistanceCard(
+              object1: "Wallet",
+              object2: "Card",
+              distance: 125.5,
             ),
-            const SizedBox(height: 10),
+
+            const SizedBox(height: 16),
+
+            if (isLoading)
+              const CircularProgressIndicator()
+            else
+              CustomButton(
+                label: "Upload Video",
+                onPressed: pickAndUploadVideo,
+              ),
+
+            const SizedBox(height: 16),
 
             Text(
-              selectedFileName ?? "No file selected",
-              style: const TextStyle(fontSize: 16),
+              apiResponse,
+              style: const TextStyle(fontSize: 16, color: Colors.green),
+              textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 20),
-
-            ElevatedButton(
-              onPressed: uploadVideo,
-              child: const Text("Upload Video"),
-            ),
-            const SizedBox(height: 20),
-
-            Text(apiResponse, style: const TextStyle(color: Colors.green)),
           ],
         ),
       ),
