@@ -91,6 +91,7 @@ class VideoProcessor:
             if distance_calculator.pixel_per_mm is None:
                 distance_calculator.update_pixel_mm_ratio(detections)
 
+            measured_distance_mm = None
             target_boxes = [d for d in detections if d["label"] in target_labels]
             if len(target_boxes) == 2:
                 box1 = target_boxes[0]["box"]

@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+
 import '../reusable_widgets/custom_app_bar.dart';
 import '../reusable_widgets/custom_button.dart';
 import '../reusable_widgets/distance_card.dart';
@@ -21,8 +22,8 @@ class _HomeScreenState extends State<HomeScreen> {
   File? selectedVideoFile;
   String apiResponse = "";
   bool isLoading = false;
-  String? processedVideoUrl;
-  double? distanceValue;
+  String? processedVideoUrl; // Backend processed video URL
+  double? measuredDistance; // Distance from backend
 
   Future<void> pickAndUploadVideo() async {
     final file = await FilePickerService.pickVideoFile();
@@ -36,8 +37,8 @@ class _HomeScreenState extends State<HomeScreen> {
       selectedVideoFile = file;
       apiResponse = "";
       processedVideoUrl = null;
-      distanceValue = null;
-      isLoading = true;
+      measuredDistance = null;
+      isLoading = true; // ✅ Show overlay spinner
     });
 
     try {
@@ -47,22 +48,21 @@ class _HomeScreenState extends State<HomeScreen> {
         object2: "card",
       );
 
-      // Extract distance safely
-      double? backendDistance;
-      if (response['distance'] != null) {
-        backendDistance = double.tryParse(response['distance'].toString());
-      }
-
       setState(() {
-        distanceValue = backendDistance;
-        apiResponse = backendDistance != null
-            ? "Distance: ${backendDistance.toStringAsFixed(2)} mm"
-            : "Distance not available";
+        // Update distance
+        measuredDistance = response['distance'] is double
+            ? response['distance']
+            : null;
 
-        // If backend also returns processed video URL
+        // Update processed video URL
         if (response['video_url'] != null) {
           processedVideoUrl = response['video_url'];
         }
+
+        // Update text message
+        apiResponse = measuredDistance != null
+            ? "Distance: $measuredDistance mm"
+            : "Distance: Not available";
       });
 
       showSnackBarMessage(context, "Video processed successfully!");
@@ -73,7 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
       showSnackBarMessage(context, "Upload failed: $e", isError: true);
     } finally {
       setState(() {
-        isLoading = false;
+        isLoading = false; // ✅ Stop overlay spinner
       });
     }
   }
@@ -81,12 +81,15 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return LoadingOverlay(
-      isLoading: isLoading,
+      isLoading: isLoading, // Purple spinner overlay
       child: Scaffold(
         appBar: const CustomAppBar(title: "Distance Measurement"),
         body: SingleChildScrollView(
           child: Column(
             children: [
+              const SizedBox(height: 16),
+
+              // Video Preview
               VideoPreview(
                 videoPlayer: selectedVideoFile != null
                     ? Text("Selected Video:\n${selectedVideoFile!.path}")
@@ -97,15 +100,19 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
               ),
 
-              // Show actual backend distance
-              DistanceCard(
-                object1: "Wallet",
-                object2: "Card",
-                distance: distanceValue ?? 0.0,
-              ),
+              const SizedBox(height: 16),
+
+              // Distance Card
+              if (measuredDistance != null)
+                DistanceCard(
+                  object1: "Wallet",
+                  object2: "Card",
+                  distance: measuredDistance!,
+                ),
 
               const SizedBox(height: 16),
 
+              // Upload Button
               CustomButton(
                 label: "Upload Video",
                 onPressed: pickAndUploadVideo,
@@ -113,16 +120,19 @@ class _HomeScreenState extends State<HomeScreen> {
 
               const SizedBox(height: 16),
 
-              Text(
-                apiResponse,
-                style: const TextStyle(fontSize: 16, color: Colors.green),
-                textAlign: TextAlign.center,
-              ),
+              // API Response
+              if (apiResponse.isNotEmpty)
+                Text(
+                  apiResponse,
+                  style: const TextStyle(fontSize: 16, color: Colors.green),
+                  textAlign: TextAlign.center,
+                ),
 
               const SizedBox(height: 16),
 
-              if (processedVideoUrl != null)
-                VideoResultPlayer(videoUrl: processedVideoUrl!),
+              // Processed Video Player
+              // if (processedVideoUrl != null)
+              //   VideoResultPlayer(videoUrl: processedVideoUrl!),
             ],
           ),
         ),

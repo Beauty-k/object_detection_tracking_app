@@ -5,7 +5,7 @@ void showSnackBarMessage(BuildContext context, String message, {bool isError = f
     SnackBar(
       content: Text(message),
       backgroundColor: isError ? Colors.red : Colors.green,
-      duration: const Duration(seconds: 2),
+      duration: const Duration(seconds: 30),
     ),
   );
 }

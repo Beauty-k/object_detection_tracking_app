@@ -28,6 +28,11 @@ class VideoProcessingService:
         VideoProcessor.ensure_output_directory(self.output_path)
 
         # Process video
-        video_processor.process_video(detector=detector,output_path=self.output_path,display=True,target_labels=(label1, label2))
+        distance_mm, _ = video_processor.process_video(
+            detector=detector,
+            output_path=self.output_path,
+            display=False,
+            target_labels=(label1, label2)
+        )
 
-        return self.output_path
+        return distance_mm, self.output_path

@@ -5,9 +5,12 @@ class VideoProcessingController:
     def calculate_distance(self, file: UploadFile, label1: str, label2: str) -> dict:
         model_path = "runs/detect/train14/weights/best.pt" 
         output_path = "static/output.mp4"
-        Video_service = VideoProcessingService(model_path,output_path)
-        result_path = Video_service.process(file, label1, label2)
+        video_service = VideoProcessingService(model_path,output_path)
+        distance_mm, result_video_path = video_service.process(file, label1, label2)
         return {
-            "message": "Distance measured successfully",
-            "output_video_path": result_path
-        }
+        "object1": label1,
+        "object2": label2,
+        "distance": distance_mm if distance_mm is not None else "N/A",
+        "unit": "mm",
+        "video_url": result_video_path
+    }
