@@ -39,6 +39,8 @@ class DistanceCalculator(ICalculator):
             cv2.line(frame, p1, p2, (0, 0, 255), 2)
             mid = ((p1[0] + p2[0]) // 2, (p1[1] + p2[1]) // 2)
             cv2.putText(frame, f"{distance_mm} mm", mid, cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
+    
+    
 
     
 

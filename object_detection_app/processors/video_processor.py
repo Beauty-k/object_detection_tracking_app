@@ -46,15 +46,7 @@ class VideoProcessor:
         all_detections = []
         
         distance_calculator = DistanceCalculator("blessing_card", reference_mm=85)
-        # testing on sample video
-        # distance_calculator = GeometryDistanceCalculator(
-        #     fov_deg=36.52,
-        #     camera_distance_mm=500,
-        #     frame_width_px=self.width
-        #     # fov_deg=33.4,
-        #     # camera_distance_mm=800,
-        #     # frame_width_px=self.width
-        # )
+
         tracker = DeepSort(max_age=30)
         while True:
             ret, frame = self.cap.read()
@@ -105,6 +97,7 @@ class VideoProcessor:
                 label1 = target_boxes[0]["label"]
                 box2 = target_boxes[1]["box"]
                 label2 = target_boxes[1]["label"]
+                measured_distance_mm , _, _ = distance_calculator.calculate(box1, box2)
                 distance_calculator.annotate_distance(annotated_frame, box1, box2, label1, label2)
 
             if writer:
@@ -126,4 +119,4 @@ class VideoProcessor:
             writer.release()
 
         print("[INFO] Video processing complete.")
-        return all_detections
+        return measured_distance_mm, all_detections
