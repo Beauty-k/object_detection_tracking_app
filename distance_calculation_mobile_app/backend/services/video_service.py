@@ -5,7 +5,7 @@ from object_detection_app.detector.object_detector import ObjectDetector
 from object_detection_app.processors.video_processor import VideoProcessor
 from object_detection_app.calculators.distance_calculator import DistanceCalculator
 from services.file_saver import UploadedFileSaver
-
+import os
 
 class VideoProcessingService:
     def __init__(self,model_path: str,output_path: str,reference_label: str = "blessing_card"):
@@ -34,5 +34,7 @@ class VideoProcessingService:
             display=False,
             target_labels=(label1, label2)
         )
+        
+        print("Saving video to:", os.path.abspath(self.output_path))
 
         return distance_mm, self.output_path

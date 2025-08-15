@@ -1,13 +1,12 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 
+import '../helpers/video_source_picker.dart';
 import '../reusable_widgets/custom_app_bar.dart';
 import '../reusable_widgets/custom_button.dart';
 import '../reusable_widgets/distance_card.dart';
 import '../reusable_widgets/video_preview.dart';
 import '../reusable_widgets/loading_overlay.dart';
-import '../reusable_widgets/video_result_player.dart';
-import '../services/file_picker_service.dart';
 import '../services/api_service.dart';
 import '../helpers/snackbar_message.dart';
 
@@ -22,11 +21,23 @@ class _HomeScreenState extends State<HomeScreen> {
   File? selectedVideoFile;
   String apiResponse = "";
   bool isLoading = false;
-  String? processedVideoUrl; // Backend processed video URL
-  double? measuredDistance; // Distance from backend
+  String? processedVideoUrl;
+  double? measuredDistance;
+
+  String object1 = "wallet";
+  String object2 = "card";
 
   Future<void> pickAndUploadVideo() async {
-    final file = await FilePickerService.pickVideoFile();
+    // Ask user to enter object names first
+    final objects = await _showObjectNameDialog();
+    if (objects == null) return;
+
+    setState(() {
+      object1 = objects[0];
+      object2 = objects[1];
+    });
+
+    final file = await VideoSourcePicker.show(context);
 
     if (file == null) {
       showSnackBarMessage(context, "No video selected", isError: true);
@@ -38,28 +49,25 @@ class _HomeScreenState extends State<HomeScreen> {
       apiResponse = "";
       processedVideoUrl = null;
       measuredDistance = null;
-      isLoading = true; // ✅ Show overlay spinner
+      isLoading = true;
     });
 
     try {
       final response = await ApiService.uploadVideoAndCalculateDistance(
         videoFile: file,
-        object1: "wallet",
-        object2: "card",
+        object1: object1,
+        object2: object2,
       );
 
       setState(() {
-        // Update distance
         measuredDistance = response['distance'] is double
             ? response['distance']
             : null;
 
-        // Update processed video URL
         if (response['video_url'] != null) {
           processedVideoUrl = response['video_url'];
         }
 
-        // Update text message
         apiResponse = measuredDistance != null
             ? "Distance: $measuredDistance mm"
             : "Distance: Not available";
@@ -73,15 +81,60 @@ class _HomeScreenState extends State<HomeScreen> {
       showSnackBarMessage(context, "Upload failed: $e", isError: true);
     } finally {
       setState(() {
-        isLoading = false; // ✅ Stop overlay spinner
+        isLoading = false;
       });
     }
+  }
+
+  Future<List<String>?> _showObjectNameDialog() async {
+    final obj1Controller = TextEditingController(text: object1);
+    final obj2Controller = TextEditingController(text: object2);
+
+    return await showDialog<List<String>>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Enter Object Names"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: obj1Controller,
+                decoration: const InputDecoration(labelText: "First object name"),
+              ),
+              TextField(
+                controller: obj2Controller,
+                decoration: const InputDecoration(labelText: "Second object name"),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, null),
+              child: const Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final obj1 = obj1Controller.text.trim();
+                final obj2 = obj2Controller.text.trim();
+                if (obj1.isEmpty || obj2.isEmpty) {
+                  showSnackBarMessage(context, "Please enter both names", isError: true);
+                  return;
+                }
+                Navigator.pop(context, [obj1, obj2]);
+              },
+              child: const Text("OK"),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return LoadingOverlay(
-      isLoading: isLoading, // Purple spinner overlay
+      isLoading: isLoading,
       child: Scaffold(
         appBar: const CustomAppBar(title: "Distance Measurement"),
         body: SingleChildScrollView(
@@ -89,7 +142,6 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               const SizedBox(height: 16),
 
-              // Video Preview
               VideoPreview(
                 videoPlayer: selectedVideoFile != null
                     ? Text("Selected Video:\n${selectedVideoFile!.path}")
@@ -102,17 +154,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
               const SizedBox(height: 16),
 
-              // Distance Card
               if (measuredDistance != null)
                 DistanceCard(
-                  object1: "Wallet",
-                  object2: "Card",
+                  object1: object1,
+                  object2: object2,
                   distance: measuredDistance!,
                 ),
 
               const SizedBox(height: 16),
 
-              // Upload Button
               CustomButton(
                 label: "Upload Video",
                 onPressed: pickAndUploadVideo,
@@ -120,19 +170,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
               const SizedBox(height: 16),
 
-              // API Response
               if (apiResponse.isNotEmpty)
                 Text(
                   apiResponse,
                   style: const TextStyle(fontSize: 16, color: Colors.green),
                   textAlign: TextAlign.center,
                 ),
-
-              const SizedBox(height: 16),
-
-              // Processed Video Player
-              // if (processedVideoUrl != null)
-              //   VideoResultPlayer(videoUrl: processedVideoUrl!),
             ],
           ),
         ),
