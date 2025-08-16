@@ -5,7 +5,7 @@ import 'dart:io';
 
 class VideoSourcePicker {
   static Future<File?> show(BuildContext context) async {
-    final ImagePicker _picker = ImagePicker();
+    final ImagePicker picker = ImagePicker();
 
     return showModalBottomSheet<File?>(
       context: context,
@@ -28,7 +28,7 @@ class VideoSourcePicker {
                 title: const Text("Record Video from Camera"),
                 onTap: () async {
                   final XFile? recorded =
-                      await _picker.pickVideo(source: ImageSource.camera);
+                      await picker.pickVideo(source: ImageSource.camera);
                   Navigator.pop(context, recorded != null ? File(recorded.path) : null);
                 },
               ),

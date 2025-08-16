@@ -19,12 +19,14 @@ class VideoProcessor:
             print("Video source opened successfully")
             return cap
         else:
-            print(f"[ERROR] Could not open video source: {source}")
+            raise FileNotFoundError(f"[ERROR] Could not open video source: {source}")
 
     def get_video_properties(self):
         width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         fps = self.cap.get(cv2.CAP_PROP_FPS)
+        # if fps == 0:
+        #      fps = 30 
         return width, height, fps
     
     
@@ -121,3 +123,47 @@ class VideoProcessor:
 
         print("[INFO] Video processing complete.")
         return measured_distance_mm, all_detections
+
+    # def process_video(self, label1, label2, output_path):
+    #     if not self.cap or not self.cap.isOpened():
+    #         raise ValueError("Cannot open input video")
+
+    #     frame_count = 0
+    #     measured_distance_mm = None
+    #     writer = None
+
+    #     try:
+    #         while True:
+    #             ret, frame = self.cap.read()
+    #             if not ret:
+    #                 print("[INFO] Video reading finished.")
+    #                 break
+
+    #             annotated_frame, distance_mm = self.process_frame(frame, label1, label2)
+
+    #             # Store first valid distance
+    #             if measured_distance_mm is None and distance_mm is not None:
+    #                 measured_distance_mm = distance_mm
+
+    #             # Initialize writer with correct size from processed frame
+    #             if writer is None:
+    #                 frame_height, frame_width = annotated_frame.shape[:2]
+    #                 fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    #                 writer = cv2.VideoWriter(output_path, fourcc, self.fps, (frame_width, frame_height))
+    #                 if not writer.isOpened():
+    #                     raise ValueError(f"Cannot open VideoWriter for {output_path}")
+
+    #             writer.write(annotated_frame)
+    #             frame_count += 1
+
+    #         print(f"[INFO] Total frames processed: {frame_count}")
+    #         print(f"[INFO] Output video saved: {self.output_path}")
+
+    #     finally:
+    #         if self.cap:
+    #             self.cap.release()
+    #         if writer:
+    #             writer.release()
+
+    #     return measured_distance_mm, self.output_path
+
