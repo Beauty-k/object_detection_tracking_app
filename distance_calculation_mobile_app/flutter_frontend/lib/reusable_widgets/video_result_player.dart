@@ -1,9 +1,17 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
 class VideoResultPlayer extends StatefulWidget {
-  final String videoUrl;
-  const VideoResultPlayer({super.key, required this.videoUrl});
+  final String? videoUrl;
+  final File? videoFile;
+
+  const VideoResultPlayer({
+    super.key,
+    this.videoUrl,
+    this.videoFile,
+  }) : assert(videoUrl != null || videoFile != null,
+              'Either videoUrl or videoFile must be provided');
 
   @override
   State<VideoResultPlayer> createState() => _VideoResultPlayerState();
@@ -15,11 +23,16 @@ class _VideoResultPlayerState extends State<VideoResultPlayer> {
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController.network(widget.videoUrl)
-      ..initialize().then((_) {
-        setState(() {});
-        _controller.play();
-      });
+    if (widget.videoFile != null) {
+      _controller = VideoPlayerController.file(widget.videoFile!);
+    } else {
+      _controller = VideoPlayerController.network(widget.videoUrl!);
+    }
+
+    _controller.initialize().then((_) {
+      setState(() {});
+      _controller.play();
+    });
   }
 
   @override

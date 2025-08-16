@@ -9,6 +9,7 @@ import '../reusable_widgets/video_preview.dart';
 import '../reusable_widgets/loading_overlay.dart';
 import '../services/api_service.dart';
 import '../helpers/snackbar_message.dart';
+import '../reusable_widgets/video_result_player.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -144,7 +145,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
               VideoPreview(
                 videoPlayer: selectedVideoFile != null
-                    ? Text("Selected Video:\n${selectedVideoFile!.path}")
+                    ? Center(
+                        child: SizedBox(
+                          height: 250,
+                          child: VideoResultPlayer(videoFile: selectedVideoFile!),
+                        ),
+                      )
                     : Container(
                         height: 200,
                         color: Colors.grey[300],
@@ -176,6 +182,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   style: const TextStyle(fontSize: 16, color: Colors.green),
                   textAlign: TextAlign.center,
                 ),
+
+              const SizedBox(height: 16),
+
+              if (processedVideoUrl != null)
+                SizedBox(
+                  height: 250,
+                  child: VideoResultPlayer(videoUrl: "http://10.0.2.2:8000/static/output.mp4"),
+  ),
             ],
           ),
         ),
