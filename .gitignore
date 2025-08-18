@@ -6,7 +6,6 @@ __pycache__/
 temp/
 *.pyc
 .env
-*.txt
 static/output.mp4
 temp/
 # Track your custom dataset (images + labels)

@@ -73,9 +73,9 @@ class _HomeScreenState extends State<HomeScreen> {
           processedVideoUrl = response['video_url'];
         }
 
-        apiResponse = measuredDistance != null
-            ? "Distance: $measuredDistance mm"
-            : "Distance: Not available";
+        // apiResponse = measuredDistance != null
+        //     ? "Distance: $measuredDistance mm"
+        //     : "Distance: Not available";
       });
 
       showSnackBarMessage(context, "Video processed successfully!");
