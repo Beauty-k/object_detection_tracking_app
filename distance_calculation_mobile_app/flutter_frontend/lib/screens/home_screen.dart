@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-
 import '../helpers/video_source_picker.dart';
 import '../reusable_widgets/custom_app_bar.dart';
 import '../reusable_widgets/custom_button.dart';
@@ -10,6 +9,7 @@ import '../reusable_widgets/loading_overlay.dart';
 import '../services/api_service.dart';
 import '../helpers/snackbar_message.dart';
 import '../reusable_widgets/video_result_player.dart';
+import '../reusable_widgets/object_name_dialog.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -30,7 +30,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> pickAndUploadVideo() async {
     // Ask user to enter object names first
-    final objects = await _showObjectNameDialog();
+    final objects = await showObjectNameDialog(
+      context,
+      initialObj1: object1,
+      initialObj2: object2,
+    );
     if (objects == null) return;
 
     setState(() {
@@ -87,51 +91,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Future<List<String>?> _showObjectNameDialog() async {
-    final obj1Controller = TextEditingController(text: object1);
-    final obj2Controller = TextEditingController(text: object2);
-
-    return await showDialog<List<String>>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text("Enter Object Names"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: obj1Controller,
-                decoration: const InputDecoration(labelText: "First object name"),
-              ),
-              TextField(
-                controller: obj2Controller,
-                decoration: const InputDecoration(labelText: "Second object name"),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, null),
-              child: const Text("Cancel"),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                final obj1 = obj1Controller.text.trim();
-                final obj2 = obj2Controller.text.trim();
-                if (obj1.isEmpty || obj2.isEmpty) {
-                  showSnackBarMessage(context, "Please enter both names", isError: true);
-                  return;
-                }
-                Navigator.pop(context, [obj1, obj2]);
-              },
-              child: const Text("OK"),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return LoadingOverlay(
@@ -148,7 +107,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     ? Center(
                         child: SizedBox(
                           height: 250,
-                          child: VideoResultPlayer(videoFile: selectedVideoFile!),
+                          child: VideoResultPlayer(
+                            videoFile: selectedVideoFile!,
+                          ),
                         ),
                       )
                     : Container(
@@ -188,8 +149,10 @@ class _HomeScreenState extends State<HomeScreen> {
               if (processedVideoUrl != null)
                 SizedBox(
                   height: 250,
-                  child: VideoResultPlayer(videoUrl: "http://10.0.2.2:8000/static/output.mp4"),
-  ),
+                  child: VideoResultPlayer(
+                    videoUrl: "http://10.0.2.2:8000/static/output.mp4",
+                  ),
+                ),
             ],
           ),
         ),
