@@ -1,6 +1,6 @@
 from pathlib import Path
 from fastapi import UploadFile
-from object_detection_app.video_sources.video_source_interface import LocalFileSource
+from object_detection_app.video_sources.local_file_source import LocalFileSource
 from object_detection_app.detector.object_detector import ObjectDetector
 from object_detection_app.processors.video_processor import VideoProcessor
 from object_detection_app.calculators.distance_calculator import DistanceCalculator
@@ -14,11 +14,10 @@ class VideoProcessingService:
         self.reference_label = reference_label
 
     def process(self,uploaded_file: UploadFile,label1: str,label2: str) -> str:
-        # Save uploaded file to temp location
+
         file_saver = UploadedFileSaver(uploaded_file)
         input_video_path = file_saver.save("temp")
 
-        # Initialize components
         video_source = LocalFileSource(str(input_video_path))
         detector = ObjectDetector(self.model_path)
         video_processor = VideoProcessor(video_source)
@@ -26,14 +25,11 @@ class VideoProcessingService:
 
         static_output_dir = Path("static")
         static_output_dir.mkdir(exist_ok=True)
-
-    # Always save output to static/output.mp4
         output_video_path = static_output_dir / "output.mp4"
 
-        # Ensure output directory exists
         VideoProcessor.ensure_output_directory(self.output_path)
         output_video_path = os.path.join("static", "output.mp4")
-        # Process video
+
         distance_mm, _ = video_processor.process_video(
             detector=detector,
             output_path=self.output_path,
@@ -42,38 +38,7 @@ class VideoProcessingService:
         )
         
         print("Saving video to:", os.path.abspath(self.output_path))
-        # video_url = f"/static/{output_video_path}"
 
         return distance_mm, self.output_path
 
-    # def process(self, uploaded_file: UploadFile, label1: str, label2: str):
-    #     # Save uploaded file to temp location
-    #     file_saver = UploadedFileSaver(uploaded_file)
-    #     input_video_path = file_saver.save("temp")
-
-    #     # Initialize components
-    #     video_source = LocalFileSource(str(input_video_path))
-    #     detector = ObjectDetector(self.model_path)
-    #     video_processor = VideoProcessor(video_source)
-    #     distance_calculator = DistanceCalculator(reference_label=self.reference_label)
-
-    #     # Ensure static output directory exists
-    #     static_output_dir = Path("static")
-    #     static_output_dir.mkdir(exist_ok=True)
-
-    #     # Always save output to static/output.mp4
-    #     output_video_path = static_output_dir / "output.mp4"
-
-    #     # Process video
-    #     distance_mm, _ = video_processor.process_video(
-    #         detector=detector,
-    #         output_path=str(output_video_path),
-    #         display=False,
-    #         target_labels=(label1, label2)
-    #     )
-
-    #     print("Saving video to:", output_video_path.resolve())
-
-    #     # Return URL for frontend
-    #     video_url = f"/static/{output_video_path.name}"
-    #     return distance_mm, video_url
+    

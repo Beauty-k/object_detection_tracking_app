@@ -1,4 +1,7 @@
-from video_sources.video_source_interface import WebcamSource, LocalFileSource, YouTubeSource
+
+from video_sources.local_file_source import LocalFileSource
+from video_sources.webcam_source import WebcamSource
+from video_sources.youtube_source import YouTubeSource
 from detector.object_detector import ObjectDetector
 from processors.video_processor import VideoProcessor
 from calculators.distance_calculator import DistanceCalculator

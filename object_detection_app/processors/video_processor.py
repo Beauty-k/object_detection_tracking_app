@@ -55,11 +55,8 @@ class VideoProcessor:
             if not ret:
                 break
 
-            # frame_count += 1
-            # Step 1: Get YOLO detections
             annotated_frame, detections = detector.get_detection(frame)
 
-            # Step 2: Prepare input for Deep SORT
             tracking_inputs = []
             for d in detections:
                 xc, yc, w, h = d["box"]
@@ -67,7 +64,6 @@ class VideoProcessor:
                 y = yc - h / 2
                 tracking_inputs.append(([x, y, w, h], d["confidence"], d["label"]))
 
-             # Step 3: Update tracks
             tracks = tracker.update_tracks(tracking_inputs, frame=frame)
             tracked_detections = []
             for track in tracks:
@@ -78,8 +74,6 @@ class VideoProcessor:
                 label = track.det_class
                 box = [l, t, r - l, b - t]
 
-               
-                # cv2.rectangle(annotated_frame, (int(l), int(t)), (int(r), int(b)), (0, 255, 0), 2)
                 cv2.putText(annotated_frame, f"{label}-{track_id}", (int(l), int(t) - 10),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
 
@@ -89,7 +83,6 @@ class VideoProcessor:
                     "box": box
                 })
 
-            # Step 4: Using tracked detections for distance calculation
             if distance_calculator.pixel_per_mm is None:
                 distance_calculator.update_pixel_mm_ratio(detections)
 
@@ -124,46 +117,4 @@ class VideoProcessor:
         print("[INFO] Video processing complete.")
         return measured_distance_mm, all_detections
 
-    # def process_video(self, label1, label2, output_path):
-    #     if not self.cap or not self.cap.isOpened():
-    #         raise ValueError("Cannot open input video")
-
-    #     frame_count = 0
-    #     measured_distance_mm = None
-    #     writer = None
-
-    #     try:
-    #         while True:
-    #             ret, frame = self.cap.read()
-    #             if not ret:
-    #                 print("[INFO] Video reading finished.")
-    #                 break
-
-    #             annotated_frame, distance_mm = self.process_frame(frame, label1, label2)
-
-    #             # Store first valid distance
-    #             if measured_distance_mm is None and distance_mm is not None:
-    #                 measured_distance_mm = distance_mm
-
-    #             # Initialize writer with correct size from processed frame
-    #             if writer is None:
-    #                 frame_height, frame_width = annotated_frame.shape[:2]
-    #                 fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    #                 writer = cv2.VideoWriter(output_path, fourcc, self.fps, (frame_width, frame_height))
-    #                 if not writer.isOpened():
-    #                     raise ValueError(f"Cannot open VideoWriter for {output_path}")
-
-    #             writer.write(annotated_frame)
-    #             frame_count += 1
-
-    #         print(f"[INFO] Total frames processed: {frame_count}")
-    #         print(f"[INFO] Output video saved: {self.output_path}")
-
-    #     finally:
-    #         if self.cap:
-    #             self.cap.release()
-    #         if writer:
-    #             writer.release()
-
-    #     return measured_distance_mm, self.output_path
 
