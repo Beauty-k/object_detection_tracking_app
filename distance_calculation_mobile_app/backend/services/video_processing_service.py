@@ -4,7 +4,7 @@ from object_detection_app.video_sources.local_file_source import LocalFileSource
 from object_detection_app.detector.object_detector import ObjectDetector
 from object_detection_app.processors.video_processor import VideoProcessor
 from object_detection_app.calculators.distance_calculator import DistanceCalculator
-from services.file_saver import UploadedFileSaver
+from services.uploaded_file_saver import UploadedFileSaver
 import os
 
 class VideoProcessingService:
@@ -27,7 +27,7 @@ class VideoProcessingService:
         static_output_dir.mkdir(exist_ok=True)
         output_video_path = static_output_dir / "output.mp4"
 
-        VideoProcessor.ensure_output_directory(self.output_path)
+        video_processor._ensure_output_directory(self.output_path)
         output_video_path = os.path.join("static", "output.mp4")
 
         distance_mm, _ = video_processor.process_video(

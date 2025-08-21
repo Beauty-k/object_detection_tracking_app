@@ -1,5 +1,5 @@
 from fastapi import UploadFile
-from services.video_service import VideoProcessingService  # You can alias or reimport differently if needed
+from distance_calculation_mobile_app.backend.services.video_processing_service import VideoProcessingService  # You can alias or reimport differently if needed
 
 class VideoProcessingController:
     def calculate_distance(self, file: UploadFile, label1: str, label2: str) -> dict:

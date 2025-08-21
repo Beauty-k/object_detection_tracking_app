@@ -1,58 +1,58 @@
 from ultralytics import YOLO
 import cv2
 import torch
-import os
-import tempfile
 
 class ObjectDetector:
+    FONT_SCALE = 0.75
+    FONT_COLOR = (0, 0, 0)
+    FONT_THICKNESS = 1
+    FONT_TYPE = cv2.FONT_HERSHEY_SIMPLEX
 
-    def __init__(self, model_path):
-
+    def __init__(self, model_path: str):
         self.model = YOLO(model_path)
-        self.setup_device()
+        self._setup_device()
 
-    def setup_device(self):
+    def _setup_device(self) -> None:
         if torch.cuda.is_available():
-            self.model.to('cuda:0')
+            self.model.to("cuda:0")
             print("Running on GPU")
         else:
             print("Running on CPU")
 
     def get_detection(self, frame):
         results = self.model(frame)[0]
-        annotated_frame = results.plot()
-        detections = []
+        frame_with_annotations = results.plot()
+        detections = [self._parse_box(box, results, frame_with_annotations) for box in results.boxes]
+        return frame_with_annotations, detections
 
-        for box in results.boxes:
-            cls_id = int(box.cls[0].item())
-            label = results.names[cls_id]
-            conf = float(box.conf[0].item())
-            x_center, y_center, w, h = box.xywh[0].tolist()
-            x1 = int(x_center - w / 2)
-            y1 = int(y_center - h / 2)
+    def _parse_box(self, box, results, frame):
+        class_id = int(box.cls[0].item())
+        label = results.names[class_id]
+        confidence_score = round(float(box.conf[0].item()), 2)
 
-            coord_text = f"XYWH: {round(x_center)}, {round(y_center)}, {round(w)}, {round(h)}"
+        x_center, y_center, width, height = box.xywh[0].tolist()
+        x1, y1 = int(x_center - width / 2), int(y_center - height / 2)
 
-            cv2.putText(
-                annotated_frame,
-                coord_text,
-                (x1, y1 - 10),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                0.75,
-                (0, 0, 0),
-                1,
-                cv2.LINE_AA
-            )
+        self._draw_coordinates(frame, x1, y1, x_center, y_center, width, height)
 
-            detections.append({
-                "label": label,
-                "confidence": round(conf, 2),
-                "box": [round(x, 2) for x in [x_center, y_center, w, h]]
-            })
+        return {
+            "label": label,
+            "confidence": confidence_score,
+            "box": [round(x, 2) for x in [x_center, y_center, width, height]],
+        }
 
-        return annotated_frame, detections
-
-
+    def _draw_coordinates(self, frame, x, y, x_center, y_center, width, height):
+        coord_text = f"XYWH: {round(x_center)}, {round(y_center)}, {round(width)}, {round(height)}"
+        cv2.putText(
+            frame,
+            coord_text,
+            (x, y - 10),
+            self.FONT_TYPE,
+            self.FONT_SCALE,
+            self.FONT_COLOR,
+            self.FONT_THICKNESS,
+            cv2.LINE_AA,
+        )
 
 
 

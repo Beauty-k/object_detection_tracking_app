@@ -10,7 +10,7 @@ class DistanceCalculator(ICalculator):
         self.pixel_per_mm = None
         self.reference_widths = []
 
-    def update_pixel_mm_ratio(self, detections):
+    def _update_pixel_mm_ratio(self, detections):
         for detection in detections:
             if detection["label"] == self.reference_label:
                 _,_,w,_ = detection["box"]
@@ -19,7 +19,7 @@ class DistanceCalculator(ICalculator):
                 return True
         return False
     
-    def get_center(self, box):
+    def _get_center(self, box):
         x_center, y_center, _, _ = box
         return x_center, y_center
     
