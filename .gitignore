@@ -1,0 +1,18 @@
+*.mp4
+*.mov
+*.avi
+*.pt
+__pycache__/
+temp/
+*.pyc
+.env
+static/output.mp4
+temp/
+# Track your custom dataset (images + labels)
+!object_detection_app/custom_dataset/train/images/*.jpg
+!object_detection_app/custom_dataset/train/labels/*.txt
+!object_detection_app/custom_dataset/test/images/*.jpg
+!object_detection_app/custom_dataset/test/labels/*.txt
+
+# Ignore everything else in custom_dataset folder
+object_detection_app/custom_dataset/**

@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 26
+names: ['Apple', 'Banana', 'Bananas', 'Broccoli', 'Capsicum', 'Cauliflower', 'Cherry', 'Chilli', 'Coconut', 'Corn', 'Cucumber', 'Grape', 'Grapes', 'Jackfruit', 'Kiwi', 'Lemon', 'Onion', 'Orange', 'Pear', 'Pineapple', 'Pomegranate', 'Potato', 'Purple Broccoli', 'Strawberry', 'Tomato', 'Watermelon']
+
+roboflow:
+  workspace: beauty-kumari
+  project: fruitsandveggie
+  version: 1
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/beauty-kumari/fruitsandveggie/dataset/1
